@@ -1,27 +1,24 @@
 import { useState, useEffect } from 'react';
 import { PiggyBank, TrendingDown, Wallet } from 'lucide-react';
-import { calculateProjection, formatCurrency } from '../lib/inflation-math';
+import { calculateRealHistoricalErosion, formatCurrency } from '../lib/inflation-math';
 import { ResultsCard } from '../components/ResultsCard';
 import { InflationChart } from '../components/InflationChart';
 
 export default function InflationSimulator() {
     const [initialAmount, setInitialAmount] = useState(10000);
-    const [monthlyContribution, setMonthlyContribution] = useState(1000);
     const [years, setYears] = useState(10);
 
-    const [results, setResults] = useState(calculateProjection({
+    const [results, setResults] = useState(calculateRealHistoricalErosion({
         initialAmount,
-        monthlyContribution,
         years
     }));
 
     useEffect(() => {
-        setResults(calculateProjection({
+        setResults(calculateRealHistoricalErosion({
             initialAmount,
-            monthlyContribution,
             years
         }));
-    }, [initialAmount, monthlyContribution, years]);
+    }, [initialAmount, years]);
 
     // Savings projection (approximate linear for display, or simple calculation)
     // Logic from requirements: "Card 02... Projected at ~6.17% p.a. / 0.5% monthly"
@@ -94,7 +91,7 @@ export default function InflationSimulator() {
     // Wait, prompt says: "Card 01: Dinheiro Parado (Nominal) - Text 'Valor Nominal Acumulado' (Total of contributions)."
     // So Card 1 = Principal.
 
-    const totalPrincipal = initialAmount + (monthlyContribution * 12 * years);
+    const totalPrincipal = initialAmount;
     const savingsBalance = results.finalNominal;
     const realValue = results.finalReal;
 
@@ -103,17 +100,21 @@ export default function InflationSimulator() {
             <div className="mx-auto max-w-6xl space-y-12">
 
                 {/* Header */}
-                <header className="space-y-4 text-center">
-                    <h1 className="font-serif text-4xl font-bold tracking-tight text-secondary md:text-5xl lg:text-6xl">
-                        A Destruição Silenciosa
-                    </h1>
-                    <p className="mx-auto max-w-2xl text-lg text-secondary/70 font-sans">
-                        Descubra como a inflação corrói o seu patrimônio enquanto ele parece crescer na poupança.
-                    </p>
+                <header className="space-y-6 text-center">
+                    <div className="space-y-4">
+                        <h1 className="font-serif text-4xl font-bold tracking-tight text-secondary md:text-5xl lg:text-6xl">
+                            A Destruição Silenciosa
+                        </h1>
+                        <p className="mx-auto max-w-2xl text-lg text-secondary/70 font-sans">
+                            Descubra como a inflação corrói o seu patrimônio enquanto ele parece crescer na poupança.
+                        </p>
+                    </div>
+
+
                 </header>
 
                 {/* Inputs Section */}
-                <section className="grid gap-8 rounded-2xl border border-border/20 bg-white/40 p-6 backdrop-blur-sm md:grid-cols-3 md:p-8">
+                <section className="grid gap-8 rounded-2xl border border-border/20 bg-white/40 p-6 backdrop-blur-sm md:grid-cols-2 md:p-8">
 
                     <div className="space-y-2">
                         <label className="text-sm font-medium uppercase tracking-wide text-secondary/60">Montante Inicial</label>
@@ -128,18 +129,7 @@ export default function InflationSimulator() {
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium uppercase tracking-wide text-secondary/60">Aporte Mensal</label>
-                        <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-secondary/40">R$</span>
-                            <input
-                                type="number"
-                                value={monthlyContribution}
-                                onChange={(e) => setMonthlyContribution(Number(e.target.value))}
-                                className="w-full rounded-lg border border-border/30 bg-white/60 py-3 pl-12 pr-4 font-serif text-xl font-bold text-secondary shadow-sm transition-all focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/50"
-                            />
-                        </div>
-                    </div>
+
 
                     <div className="space-y-2">
                         <label className="text-sm font-medium uppercase tracking-wide text-secondary/60">Horizonte (Anos): {years}</label>
@@ -202,8 +192,13 @@ export default function InflationSimulator() {
                 </section>
 
                 {/* Footer info */}
-                <footer className="text-center text-sm text-secondary/40 font-sans">
-                    <p>Considerando IPCA fixo de 4,5% a.a. e rendimento da poupança de 0,5% a.m.</p>
+                <footer className="text-center text-sm text-secondary/40 font-sans space-y-2">
+                    <p>
+                        Simulação baseada no histórico real do IPCA (2016-2025). Valores passados não garantem rentabilidade futura.
+                    </p>
+                    {(results as any).periodLabel && (
+                        <p className="text-xs opacity-70">Período utilizado: {(results as any).periodLabel}</p>
+                    )}
                 </footer>
 
             </div>

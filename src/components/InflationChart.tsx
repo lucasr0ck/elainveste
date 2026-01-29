@@ -92,12 +92,12 @@ export function InflationChart({ data }: InflationChartProps) {
                         fill="url(#colorNominal)"
                     />
                     <Area
-                        type="monotone"
+                        type="linear"
                         dataKey="realValue"
                         name="Poder de Compra Real"
-                        stroke="#6B7280"
+                        stroke="#1A1A1A"
                         strokeWidth={2}
-                        strokeDasharray="5 5"
+                        strokeDasharray="4 4"
                         fill="url(#colorReal)"
                     />
                 </AreaChart>
